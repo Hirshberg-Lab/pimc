@@ -69,6 +69,7 @@ REGISTER_ESTIMATOR("cylinder radial potential",CylinderRadialPotentialEstimator)
 REGISTER_ESTIMATOR("cylinder linear potential",CylinderLinearPotentialEstimator);
 REGISTER_ESTIMATOR("cylinder potential energy",PotentialEnergyEstimator);
 REGISTER_ESTIMATOR("cylinder static structure factor",CylinderStaticStructureFactorEstimator);
+REGISTER_ESTIMATOR("coordinates", CoordinatesEstimator);
 REGISTER_ESTIMATOR("pigs kinetic energy",KineticEnergyEstimator);
 REGISTER_ESTIMATOR("pigs total energy",TotalEnergyEstimator);
 REGISTER_ESTIMATOR("pigs thermodynamic potential energy",ThermoPotentialEnergyEstimator);
