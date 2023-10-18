@@ -159,7 +159,7 @@ if ((MSVC) AND (MSVC_VERSION GREATER_EQUAL 1914))
 endif()
 
 # Find Boost
-find_package( Boost 1.71.0 REQUIRED COMPONENTS program_options serialization )
+find_package( Boost 1.71.0 REQUIRED COMPONENTS program_options serialization filesystem )
 
 # Find Blitz
 find_package( Blitz REQUIRED )

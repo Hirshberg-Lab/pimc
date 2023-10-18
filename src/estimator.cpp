@@ -12,6 +12,9 @@
 #include "communicator.h"
 #include "factory.h"
 
+// Necessary for particle coordinates (to create a folder containing the .xyz files)
+#include <boost/filesystem.hpp>
+
 
 /**************************************************************************//**
  * Setup the estimator factory.
@@ -241,7 +244,7 @@ void EstimatorBase::prepare() {
 
     /* Provided that we will perform at least one measurement, open an output
      * file and possibly write a header */
-    if (frequency > 0) {
+    if (frequency > 0 && !label.empty()) {
         /* Assign the output file pointer */
         outFilePtr = &(communicate()->file(label)->stream());
 
@@ -4232,6 +4235,72 @@ void CylinderStaticStructureFactorEstimator::sample() {
     }
 }
 
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// PARTICLE COORDINATES ESTIMATOR CLASS ---------------------------------------------
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
+/*************************************************************************//**
+ *  Constructor
+******************************************************************************/
+CoordinatesEstimator::CoordinatesEstimator(const Path& _path,
+    ActionBase* _actionPtr, const MTRand& _random, double _maxR,
+    int _frequency, string _label) :
+    EstimatorBase(_path, _actionPtr, _random, _maxR, _frequency, _label) {
+}
+
+/*************************************************************************//**
+ *  Destructor
+******************************************************************************/
+CoordinatesEstimator::~CoordinatesEstimator() {
+}
+
+void CoordinatesEstimator::sample() {
+    numSampled++;
+
+    if (frequency && ((numSampled % frequency) == 0)) {
+        totNumAccumulated++;
+        numAccumulated++;
+        accumulate();
+    }
+}
+
+/*************************************************************************//**
+ *  No need to accumulate coordinates (we just output them).
+******************************************************************************/
+void CoordinatesEstimator::accumulate() {
+}
+
+/*************************************************************************//**
+ *  At the end of each measurement, write the coordinates of all the beads
+ *  to an xyz file. "system_i.xyz" file contains the coordinates of all the
+ *  atoms corresponding to the ith bead.
+******************************************************************************/
+void CoordinatesEstimator::output() {
+    int numParticles = path.getNumParticles();
+
+    std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
+
+    boost::filesystem::create_directory(coordsPath);
+
+    for (int i = 0; i < path.numTimeSlices; ++i) {
+        std::ofstream beadCoordsFile;
+        beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % i), std::ios_base::app);
+        beadCoordsFile << numParticles << "\n";
+        beadCoordsFile << format(" Atoms. MC step: %d\n") % numSampled;
+
+        for (int j = 0; j < numParticles; j++) {
+            beadCoordsFile << "1 ";
+
+            for (int k = 0; k < NDIM; ++k) {
+                beadCoordsFile << path(i, j)(k) << " ";
+            }
+
+            beadCoordsFile << "\n";
+        }
+    }
+}
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // BEGIN PIGS ESTIMATORS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//

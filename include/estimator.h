@@ -1076,6 +1076,27 @@ class CylinderStaticStructureFactorEstimator: public EstimatorBase {
         vector <vector<dVec> > q;       // the q-vectors
 };
 
+// ========================================================================  
+// Particle Coordinates Estimator Class 
+// ========================================================================  
+class CoordinatesEstimator : public EstimatorBase {
+
+public:
+    CoordinatesEstimator(const Path&, ActionBase*, const MTRand&, double,
+        int _frequency = 1, string _label = "");
+    ~CoordinatesEstimator();
+
+    void sample();
+
+    static const string name;
+    string getName() const { return name; }
+
+    void output(); // override the output
+
+private:
+    void accumulate();          // Accumulate values
+};
+
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // BEGIN PIGS ESTIMATORS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~//
