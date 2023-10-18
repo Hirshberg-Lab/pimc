@@ -405,30 +405,40 @@ class LJPotential : public PotentialBase  {
         ~LJPotential ();
 
         /**
-         * Return the dipole potential 1/r^3.
+         * Return the Lennard-Jones (6-12) potential.
          */
         double V(const dVec &r) {
             double x = sqrt(dot(r,r));
             if (x < EPS)
                 return LBIG;
-            return 0.0;
+            
+            double sigma_by_r6 = lj_sigma / x;
+            sigma_by_r6 = sigma_by_r6 * sigma_by_r6 * sigma_by_r6;
+            sigma_by_r6 = sigma_by_r6 * sigma_by_r6;
+
+            return 4.0 * lj_epsilon * (sigma_by_r6 * (sigma_by_r6 - 1));
         }
 
         /**
-         * Return the gradient of the dipole potential.
+         * Return the gradient of the Lennard-Jones potential.
          */
         dVec gradV(const dVec &r) {
             double x = sqrt(dot(r,r));
             if (x < EPS)
                 return 0.0;
-            return 0.0;
+
+            double sigma_by_r6 = lj_sigma / x;
+            sigma_by_r6 = sigma_by_r6 * sigma_by_r6 * sigma_by_r6;
+            sigma_by_r6 = sigma_by_r6 * sigma_by_r6;
+
+            return -24.0 * lj_epsilon * (sigma_by_r6 * (2 * sigma_by_r6 - 1) / x);
         }
 
         /**
-         * Return the Laplacian of the dipolar potential.
+         * Return the Laplacian of the Lennard-Jones potential.
          */
         double grad2V(const dVec &r) {
-            double x = sqrt(dot(r,r));
+            double x = sqrt(dot(r, r));
             if (x < EPS)
                 return 0.0;
             return 0.0;
