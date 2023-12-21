@@ -4258,9 +4258,17 @@ CoordinatesEstimator::~CoordinatesEstimator() {
 }
 
 void CoordinatesEstimator::sample() {
+    /*
     numSampled++;
 
     if (frequency && ((numSampled % frequency) == 0)) {
+        totNumAccumulated++;
+        numAccumulated++;
+        accumulate();
+    }
+    */
+
+    if (baseSample()) {
         totNumAccumulated++;
         numAccumulated++;
         accumulate();
@@ -4279,6 +4287,7 @@ void CoordinatesEstimator::accumulate() {
  *  atoms corresponding to the ith bead.
 ******************************************************************************/
 void CoordinatesEstimator::output() {
+    /*
     int numParticles = path.getNumParticles();
 
     std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
@@ -4299,6 +4308,36 @@ void CoordinatesEstimator::output() {
             }
 
             beadCoordsFile << "\n";
+        }
+    }
+    */
+    if (path.worm.getNumBeadsOn() == numBeads0) {
+        beadLocator beadIndex;
+
+        std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
+
+        boost::filesystem::create_directory(coordsPath);
+
+        for (int slice = 0; slice < path.numTimeSlices; ++slice) {
+            std::ofstream beadCoordsFile;
+            beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % slice), std::ios_base::app);
+
+            int numParticles = path.numBeadsAtSlice(slice);
+            beadCoordsFile << numParticles << "\n";
+
+            beadCoordsFile << format(" Atoms. MC step: %d\n") % numSampled;
+
+            for (int ptcl = 0; ptcl < numParticles; ptcl++) {
+                beadIndex = slice, ptcl;
+
+                beadCoordsFile << "1 ";
+
+                for (int k = 0; k < NDIM; ++k) {
+                    beadCoordsFile << path(beadIndex)(k) << " ";
+                }
+
+                beadCoordsFile << "\n";
+            }
         }
     }
 }
