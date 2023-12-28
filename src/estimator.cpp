@@ -4375,13 +4375,13 @@ void LinksEstimator::sample() {
 }
 
 /*************************************************************************//**
- *  No need to accumulate coordinates (we just output them).
+ *  No need to accumulate links (we just output them).
 ******************************************************************************/
 void LinksEstimator::accumulate() {
 }
 
 /*************************************************************************//**
- *  At the end of each measurement write the links of all the beads to a file.
+ *  At the end of each measurement write the links to a file.
 ******************************************************************************/
 void LinksEstimator::output() {
     std::ofstream linksFile;
