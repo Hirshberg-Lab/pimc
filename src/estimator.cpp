@@ -70,6 +70,8 @@ REGISTER_ESTIMATOR("cylinder linear potential",CylinderLinearPotentialEstimator)
 REGISTER_ESTIMATOR("cylinder potential energy",PotentialEnergyEstimator);
 REGISTER_ESTIMATOR("cylinder static structure factor",CylinderStaticStructureFactorEstimator);
 REGISTER_ESTIMATOR("coordinates", CoordinatesEstimator);
+REGISTER_ESTIMATOR("links", LinksEstimator);
+
 REGISTER_ESTIMATOR("pigs kinetic energy",KineticEnergyEstimator);
 REGISTER_ESTIMATOR("pigs total energy",TotalEnergyEstimator);
 REGISTER_ESTIMATOR("pigs thermodynamic potential energy",ThermoPotentialEnergyEstimator);
@@ -4337,6 +4339,96 @@ void CoordinatesEstimator::output() {
                 }
 
                 beadCoordsFile << "\n";
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// PARTICLE LINKS ESTIMATOR CLASS ---------------------------------------------
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+
+/*************************************************************************//**
+ *  Constructor
+******************************************************************************/
+LinksEstimator::LinksEstimator(const Path& _path,
+    ActionBase* _actionPtr, const MTRand& _random, double _maxR,
+    int _frequency, string _label) :
+    EstimatorBase(_path, _actionPtr, _random, _maxR, _frequency, _label) {
+}
+
+/*************************************************************************//**
+ *  Destructor
+******************************************************************************/
+LinksEstimator::~LinksEstimator() {
+    doBead.free();
+}
+
+void LinksEstimator::sample() {
+    if (baseSample()) {
+        totNumAccumulated++;
+        numAccumulated++;
+        accumulate();
+    }
+}
+
+/*************************************************************************//**
+ *  No need to accumulate coordinates (we just output them).
+******************************************************************************/
+void LinksEstimator::accumulate() {
+}
+
+/*************************************************************************//**
+ *  At the end of each measurement write the links of all the beads to a file.
+******************************************************************************/
+void LinksEstimator::output() {
+    std::ofstream linksFile;
+    linksFile.open(str(format("OUTPUT/ce-links-%s.dat") % constants()->id()), std::ios_base::app);
+
+    if (path.worm.getNumBeadsOn() == numBeads0) {
+
+        linksFile << format("MC step: %d\n") % numSampled;
+
+        /* The start bead for each world line, and the moving index */
+        beadLocator startBead;
+        beadLocator beadIndex;
+
+        int numParticles = path.getTrueNumParticles();
+        int numWorldlines = path.numBeadsAtSlice(0);
+
+        /* We create a local vector, which determines whether or not we have
+         * already included a bead at slice 0*/
+        doBead.resize(numWorldlines);
+        doBead = true;
+
+        /* We go through each particle/worldline */
+        for (int n = 0; n < numWorldlines; n++) {
+
+            /* The initial bead to be moved */
+            startBead = 0, n;
+
+            /* We make sure we don't try to touch the same worldline twice */
+            if (doBead(n)) {
+
+                /* Mark the beads as touched and increment the number of worldlines */
+                beadIndex = startBead;
+
+                linksFile << beadIndex;
+
+                /* We simply advance until we have looped back on ourselves. */
+                do {
+                    /* We turn off any zero-slice beads we have touched */
+                    if (beadIndex[0] == 0)
+                        doBead(beadIndex[1]) = false;
+
+                    beadIndex = path.next(beadIndex);
+
+                    linksFile << "-" << beadIndex;
+                } while (!all(beadIndex == startBead));
+
+                linksFile << "\n";
             }
         }
     }
