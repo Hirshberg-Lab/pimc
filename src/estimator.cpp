@@ -4414,7 +4414,8 @@ void LinksEstimator::output() {
 
                 /* Mark the beads as touched and increment the number of worldlines */
                 beadIndex = startBead;
-
+                
+                linksFile << "Cycle:\n";
                 linksFile << beadIndex;
 
                 /* We simply advance until we have looped back on ourselves. */
