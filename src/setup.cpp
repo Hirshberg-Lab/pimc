@@ -1567,6 +1567,11 @@ void Setup::outputOptions(int argc, char *argv[], const uint32 _seed,
     else
         communicate()->file("log")->stream() << format("%-24s\t:\t%s\n") % "Ensemble" % "grand canonical";
 
+    if (BOLTZMANNONS)
+        communicate()->file("log")->stream() << format("%-24s\t:\t%s\n") % "Statistics" % "Boltzmannonic";
+    else
+        communicate()->file("log")->stream() << format("%-24s\t:\t%s\n") % "Statistics" % "Bosonic";
+    
     if (PIGS)
         communicate()->file("log")->stream() << format("%-24s\t:\t%s\n") % "Simulation Type" % "PIGS";
     else

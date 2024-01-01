@@ -4313,33 +4313,30 @@ void CoordinatesEstimator::output() {
         }
     }
     */
-    if (path.worm.getNumBeadsOn() == numBeads0) {
-        beadLocator beadIndex;
+    if (path.worm.getNumBeadsOn() != numBeads0) return;
+    
+    beadLocator beadIndex;
+    std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
+    boost::filesystem::create_directory(coordsPath);
 
-        std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
+    for (int slice = 0; slice < path.numTimeSlices; ++slice) {
+        std::ofstream beadCoordsFile;
+        beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % slice), std::ios_base::app);
 
-        boost::filesystem::create_directory(coordsPath);
+        int numParticles = path.numBeadsAtSlice(slice);
+        beadCoordsFile << numParticles << "\n";
 
-        for (int slice = 0; slice < path.numTimeSlices; ++slice) {
-            std::ofstream beadCoordsFile;
-            beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % slice), std::ios_base::app);
+        beadCoordsFile << format(" Atoms. MC step: %d\n") % numSampled;
 
-            int numParticles = path.numBeadsAtSlice(slice);
-            beadCoordsFile << numParticles << "\n";
+        for (int ptcl = 0; ptcl < numParticles; ptcl++) {
+            beadIndex = slice, ptcl;
+            beadCoordsFile << "1 ";
 
-            beadCoordsFile << format(" Atoms. MC step: %d\n") % numSampled;
-
-            for (int ptcl = 0; ptcl < numParticles; ptcl++) {
-                beadIndex = slice, ptcl;
-
-                beadCoordsFile << "1 ";
-
-                for (int k = 0; k < NDIM; ++k) {
-                    beadCoordsFile << path(beadIndex)(k) << " ";
-                }
-
-                beadCoordsFile << "\n";
+            for (int k = 0; k < NDIM; ++k) {
+                beadCoordsFile << path(beadIndex)(k) << " ";
             }
+
+            beadCoordsFile << "\n";
         }
     }
 }
@@ -4387,50 +4384,49 @@ void LinksEstimator::output() {
     std::ofstream linksFile;
     linksFile.open(str(format("OUTPUT/ce-links-%s.dat") % constants()->id()), std::ios_base::app);
 
-    if (path.worm.getNumBeadsOn() == numBeads0) {
+    if (path.worm.getNumBeadsOn() != numBeads0) return;
 
-        linksFile << format("MC step: %d\n") % numSampled;
+    linksFile << format("MC step: %d\n") % numSampled;
 
-        /* The start bead for each world line, and the moving index */
-        beadLocator startBead;
-        beadLocator beadIndex;
+    /* The start bead for each world line, and the moving index */
+    beadLocator startBead;
+    beadLocator beadIndex;
 
-        int numParticles = path.getTrueNumParticles();
-        int numWorldlines = path.numBeadsAtSlice(0);
+    int numParticles = path.getTrueNumParticles();
+    int numWorldlines = path.numBeadsAtSlice(0);
 
-        /* We create a local vector, which determines whether or not we have
-         * already included a bead at slice 0*/
-        doBead.resize(numWorldlines);
-        doBead = true;
+    /* We create a local vector, which determines whether or not we have
+     * already included a bead at slice 0*/
+    doBead.resize(numWorldlines);
+    doBead = true;
 
-        /* We go through each particle/worldline */
-        for (int n = 0; n < numWorldlines; n++) {
+    /* We go through each particle/worldline */
+    for (int n = 0; n < numWorldlines; n++) {
 
-            /* The initial bead to be moved */
-            startBead = 0, n;
+        /* The initial bead to be moved */
+        startBead = 0, n;
 
-            /* We make sure we don't try to touch the same worldline twice */
-            if (doBead(n)) {
+        /* We make sure we don't try to touch the same worldline twice */
+        if (doBead(n)) {
 
-                /* Mark the beads as touched and increment the number of worldlines */
-                beadIndex = startBead;
-                
-                linksFile << "Cycle:\n";
-                linksFile << beadIndex;
+            /* Mark the beads as touched and increment the number of worldlines */
+            beadIndex = startBead;
 
-                /* We simply advance until we have looped back on ourselves. */
-                do {
-                    /* We turn off any zero-slice beads we have touched */
-                    if (beadIndex[0] == 0)
-                        doBead(beadIndex[1]) = false;
+            linksFile << "Cycle:\n";
+            linksFile << beadIndex;
 
-                    beadIndex = path.next(beadIndex);
+            /* We simply advance until we have looped back on ourselves. */
+            do {
+                /* We turn off any zero-slice beads we have touched */
+                if (beadIndex[0] == 0)
+                    doBead(beadIndex[1]) = false;
 
-                    linksFile << "-" << beadIndex;
-                } while (!all(beadIndex == startBead));
+                beadIndex = path.next(beadIndex);
 
-                linksFile << "\n";
-            }
+                linksFile << "-" << beadIndex;
+            } while (!all(beadIndex == startBead));
+
+            linksFile << "\n";
         }
     }
 }
