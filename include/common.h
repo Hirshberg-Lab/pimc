@@ -45,6 +45,8 @@
 
 #include <boost/math/tools/minima.hpp> // find minima using Brent's method
 
+#include <boost/filesystem.hpp>
+
 /* Debugging librarys and definitions. There is only an effect if
  * the code is compiled with PIMC_DEBUG on.*/
 #ifdef PIMC_DEBUG

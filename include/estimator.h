@@ -1086,15 +1086,10 @@ public:
         int _frequency = 1, string _label = "");
     ~CoordinatesEstimator();
 
-    void sample();
-
     static const string name;
     string getName() const { return name; }
 
     void output(); // override the output
-
-private:
-    void accumulate();          // Accumulate values
 };
 
 // ========================================================================
@@ -1107,15 +1102,11 @@ public:
         int _frequency = 1, string _label = "");
     ~LinksEstimator();
 
-    void sample();
-
     static const string name;
     string getName() const { return name; }
 
     void output(); // override the output
-
 private:
-    void accumulate();          // Accumulate values
     Array <bool, 1> doBead;      // Used for ensuring we don't double count beads
 };
 

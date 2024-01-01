@@ -12,10 +12,6 @@
 #include "communicator.h"
 #include "factory.h"
 
-// Necessary for particle coordinates (to create a folder containing the .xyz files)
-#include <boost/filesystem.hpp>
-
-
 /**************************************************************************//**
  * Setup the estimator factory.
 ******************************************************************************/
@@ -4259,65 +4255,17 @@ CoordinatesEstimator::CoordinatesEstimator(const Path& _path,
 CoordinatesEstimator::~CoordinatesEstimator() {
 }
 
-void CoordinatesEstimator::sample() {
-    /*
-    numSampled++;
-
-    if (frequency && ((numSampled % frequency) == 0)) {
-        totNumAccumulated++;
-        numAccumulated++;
-        accumulate();
-    }
-    */
-
-    if (baseSample()) {
-        totNumAccumulated++;
-        numAccumulated++;
-        accumulate();
-    }
-}
-
-/*************************************************************************//**
- *  No need to accumulate coordinates (we just output them).
-******************************************************************************/
-void CoordinatesEstimator::accumulate() {
-}
-
 /*************************************************************************//**
  *  At the end of each measurement, write the coordinates of all the beads
  *  to an xyz file. "system_i.xyz" file contains the coordinates of all the
  *  atoms corresponding to the ith bead.
 ******************************************************************************/
 void CoordinatesEstimator::output() {
-    /*
-    int numParticles = path.getNumParticles();
-
-    std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
-
-    boost::filesystem::create_directory(coordsPath);
-
-    for (int i = 0; i < path.numTimeSlices; ++i) {
-        std::ofstream beadCoordsFile;
-        beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % i), std::ios_base::app);
-        beadCoordsFile << numParticles << "\n";
-        beadCoordsFile << format(" Atoms. MC step: %d\n") % numSampled;
-
-        for (int j = 0; j < numParticles; j++) {
-            beadCoordsFile << "1 ";
-
-            for (int k = 0; k < NDIM; ++k) {
-                beadCoordsFile << path(i, j)(k) << " ";
-            }
-
-            beadCoordsFile << "\n";
-        }
-    }
-    */
     if (path.worm.getNumBeadsOn() != numBeads0) return;
     
     beadLocator beadIndex;
     std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
-    boost::filesystem::create_directory(coordsPath);
+    //boost::filesystem::create_directory(coordsPath);
 
     for (int slice = 0; slice < path.numTimeSlices; ++slice) {
         std::ofstream beadCoordsFile;
@@ -4361,20 +4309,6 @@ LinksEstimator::LinksEstimator(const Path& _path,
 ******************************************************************************/
 LinksEstimator::~LinksEstimator() {
     doBead.free();
-}
-
-void LinksEstimator::sample() {
-    if (baseSample()) {
-        totNumAccumulated++;
-        numAccumulated++;
-        accumulate();
-    }
-}
-
-/*************************************************************************//**
- *  No need to accumulate links (we just output them).
-******************************************************************************/
-void LinksEstimator::accumulate() {
 }
 
 /*************************************************************************//**

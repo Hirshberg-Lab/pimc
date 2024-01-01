@@ -97,6 +97,8 @@ int main (int argc, char *argv[]) {
     Array<dVec,1> initialPos = 
         externalPotentialPtr->initialConfig(boxPtr,random,constants()->initialNumParticles());
 
+    Array<dVec, 1> initialCoords = initialPos.copy();
+
     /* Perform a classical canonical pre-equilibration to obtain a suitable
      * initial state if N > 0*/
     if (!constants()->restart() && (constants()->initialNumParticles() > 0) ) {
@@ -147,6 +149,35 @@ int main (int argc, char *argv[]) {
     /* Setup the multi-path estimators */
     if(Npaths>1){
         estimatorsPtrVec.push_back(setup.estimators(pathPtrVec,actionPtrVec,random));
+    }
+
+    /* Output the initial coordinates, if the "coordinates" estimator was requested */
+    bool requested_coords = std::any_of(estimatorsPtrVec.begin(), estimatorsPtrVec.end(), [&](const auto& estPtr) {
+    return std::any_of(estPtr.begin(), estPtr.end(), [&](const auto& estimator) {
+        return estimator.getName() == "coordinates";
+        });
+    });
+
+    if (requested_coords) {
+        std::string coordsPath = str(format("OUTPUT/coords-%s") % constants()->id());
+        boost::filesystem::create_directory(coordsPath);
+
+        for (int slice = 0; slice < constants()->numTimeSlices(); ++slice) {
+            std::ofstream beadCoordsFile;
+            beadCoordsFile.open(str(format("%s/system_%02d.xyz") % coordsPath % slice), std::ios_base::app);
+
+            int numParticles = initialCoords.extent(0);
+            beadCoordsFile << numParticles << "\n Atoms. MC step: 0\n";
+
+            for (int ptcl = 0; ptcl < numParticles; ptcl++) {
+                beadCoordsFile << "1 ";
+
+                for (int axis = 0; axis < NDIM; ++axis)
+                    beadCoordsFile << initialCoords(ptcl)[axis] << " ";
+
+                beadCoordsFile << "\n";
+            }
+        }
     }
 
     /* Setup the pimc object */
