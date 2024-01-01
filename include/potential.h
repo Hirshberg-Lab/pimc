@@ -192,6 +192,38 @@ class SingleWellPotential : public PotentialBase {
         }
 };
 
+// ========================================================================
+// DoubleWellPotential Class
+// ========================================================================
+/**
+ * Computes the potential energy for an external double well potential.
+ */
+class DoubleWellPotential : public PotentialBase {
+public:
+    DoubleWellPotential();
+    DoubleWellPotential(double, double);
+    ~DoubleWellPotential();
+
+    double strength, loc;
+
+    /** The potential */
+    double V(const dVec& r) {
+        double prefactor = 0.5 * strength / constants()->lambda();
+        double r2 = dot(r, r);
+        double loc2 = loc * loc;
+        return prefactor * (loc2 * loc2 - 2.0 * loc2 * r2 + r2 * r2);
+    }
+
+    /** The gradient of the potential. */
+    dVec gradV(const dVec& r) {
+        double r2 = dot(r, r);
+        double loc2 = loc * loc;
+        dVec tempr;
+        tempr = r;
+        return ((-4.0 * loc2 + 4.0 * r2) * tempr);
+    }
+};
+
 // ========================================================================  
 // HarmonicCylinderPotential Class
 // ========================================================================  

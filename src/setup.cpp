@@ -357,6 +357,8 @@ void Setup::initParameters() {
     params.add<double>("delta_strength,c","delta function potential integrated strength",oClass,10.0);
     params.add<double>("interaction_strength,g","interaction parameter",oClass,1.0);
     params.add<double>("omega","harmonic interaction potential frequency",oClass,1.0);
+    params.add<double>("dw_strength", "Double-well strength", oClass, 1.0);
+    params.add<double>("dw_loc", "Location of the wells in the double-well potential [angstroms]", oClass, 1.0);
     params.add<double>("lj_sigma","Lennard-Jones hard-core radius [angstroms]",oClass,2.74);
     params.add<double>("lj_epsilon","Lennard-Jones energy scale [kelvin]",oClass,16.2463);
     params.add<double>("lj_width","Radial with of LJ plated cylinder material [angstroms]",oClass);
@@ -1093,6 +1095,8 @@ PotentialBase * Setup::externalPotential(const Container* boxPtr) {
         externalPotentialPtr = new HardCylinderPotential(params["radius"].as<double>());
     else if (constants()->extPotentialType() == "single_well")
         externalPotentialPtr = new SingleWellPotential();
+    else if (constants()->extPotentialType() == "double_well")
+        externalPotentialPtr = new DoubleWellPotential(params["dw_strength"].as<double>(), params["dw_loc"].as<double>());
     else if (constants()->extPotentialType() == "fixed_aziz") 
         externalPotentialPtr = new FixedAzizPotential(boxPtr);
     else if (constants()->extPotentialType() == "gasp_prim")
