@@ -512,9 +512,9 @@ bool Setup::parseOptions() {
     /* Output the statistics the code was compiled for then exit */
     if (params("statistics")) {
         if (BOLTZMANNONS)
-            cout << endl << format("Code was compiled for distinguishable particles.") << endl << endl;
+            cout << endl << "Code was compiled for distinguishable particles." << endl << endl;
         else
-            cout << endl << format("Code was compiled for bosonic particles.") << endl << endl;
+            cout << endl << "Code was compiled for bosonic particles." << endl << endl;
         return true;
     }
 
