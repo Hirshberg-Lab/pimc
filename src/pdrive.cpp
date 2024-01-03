@@ -153,8 +153,8 @@ int main (int argc, char *argv[]) {
 
     /* Output the initial coordinates, if the "coordinates" estimator was requested */
     bool requested_coords = std::any_of(estimatorsPtrVec.begin(), estimatorsPtrVec.end(), [&](const auto& estPtr) {
-    return std::any_of(estPtr.begin(), estPtr.end(), [&](const auto& estimator) {
-        return estimator.getName() == "coordinates";
+        return std::any_of(estPtr.begin(), estPtr.end(), [&](const auto& estimator) {
+            return estimator.getName() == "coordinates";
         });
     });
 
