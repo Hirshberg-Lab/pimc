@@ -325,6 +325,7 @@ void Setup::initParameters() {
     params.add<bool>("version","output repo version",oClass);
     params.add<bool>("validate","validate command line or xml options",oClass);
     params.add<bool>("dimension","output currently compiled dimension",oClass);
+    params.add<bool>("statistics","output current statistics",oClass);
     params.add<int>("output_config,o","number of output configurations",oClass,0);
     params.add<uint32>("process,p","process or cpu number",oClass,0);
     params.add<string>("restart,R","restart running simulation with PIMCID",oClass);
@@ -505,6 +506,15 @@ bool Setup::parseOptions() {
     if (params("dimension")) {
         cout << endl << format("Code was compiled for a %d-dimensional system.") % NDIM 
             << endl << endl;
+        return true;
+    }
+
+    /* Output the dimension the code was compiled with then exit */
+    if (params("statistics")) {
+        if (BOLTZMANNONS)
+            cout << endl << format("Code was compiled for distinguishable particles.") << endl << endl;
+        else
+            cout << endl << format("Code was compiled for bosonic particles.") << endl << endl;
         return true;
     }
 
