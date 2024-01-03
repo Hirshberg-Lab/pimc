@@ -509,7 +509,7 @@ bool Setup::parseOptions() {
         return true;
     }
 
-    /* Output the dimension the code was compiled with then exit */
+    /* Output the statistics the code was compiled for then exit */
     if (params("statistics")) {
         if (BOLTZMANNONS)
             cout << endl << format("Code was compiled for distinguishable particles.") << endl << endl;
